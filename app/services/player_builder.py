@@ -1,67 +1,56 @@
 from datetime import datetime, timedelta
 
-from config import DevelopmentConfig
 from app.services import RiotService
 from app.models import LeaguePlayer
 from app.repository.league_player_repo import LeaguePlayerRepository
 
 class PlayerBuilder:
+    def __init__(self, riot: RiotService, repo: LeaguePlayerRepository):
+        self.riot_api = riot
+        self.repo = repo
 
-    def __init__(self, riot: RiotService):
-        self.riot = riot
-        self.sql_folder = DevelopmentConfig.BASE_SQL_DIR
-        self.repo = LeaguePlayerRepository()
+    def get_player(self, name: str, tag: str, server: str) -> LeaguePlayer:
+        self.riot_api.set_region
 
-    def main_build(self, name: str, tag: str, server: str) -> LeaguePlayer:
+        data = self.repo.fetch_account_summoner_data_name(name, tag, server)
+
+        if not data or self._is_stale(data["last_updated"]):
+            data = self._refresh_player(name, tag, server)
+
+        champion_mastery = self.repo.fetch_champion_mastery_puuid(data["puuid"])
+        ranked = self.repo.fetch_ranked_data_puuid(data["puuid"])
+
+        return LeaguePlayer(data, champion_mastery, ranked)
+    
+    def _is_stale(self, last_updated: datetime) -> bool:
+        return last_updated < datetime.now() - timedelta(seconds=120)
+    
+    def _refresh_player(self, name: str, tag: str, server: str) -> dict:
+        api_account = self.riot_api.get_account(summoner_name=name, tag=tag)
+        if not api_account:
+            raise ValueError("Account not found")
         
-        self.riot.set_region(server)
-
-        # try and fetch data from database
-        account_summoner_data = self.repo.fetch_account_summoner_data_name(name, tag, server)
-        now = datetime.now()
-        time_limit = now - timedelta(seconds=120)
-
-        if not account_summoner_data or account_summoner_data["last_updated"] < time_limit:
-            if not self.update_build(name, tag, server):
-                return "Update failed"
-            account_summoner_data = self.repo.fetch_account_summoner_data_name(name, tag, server)
-
-        champion_mastery_data = self.repo.fetch_champion_mastery_puuid(account_summoner_data["puuid"])
-        ranked_data = self.repo.fetch_ranked_data_puuid(account_summoner_data["puuid"])
-
-        return LeaguePlayer(
-            account_summoner_data,
-            champion_mastery_data,
-            ranked_data
+        api_summoner = self.riot_api.get_summoner(api_account["puuid"])
+        if not api_summoner:
+            raise ValueError("Summoner not found")
+        
+        self.repo.insert_account_summoner_data(
+            api_account["puuid"],
+            api_account["gameName"],
+            api_account["tagLine"],
+            api_summoner["summonerLevel"],
+            api_summoner["profileIconId"],
+            server
         )
 
-    def update_build(self, name, tag, server) -> bool:
+        self.repo.insert_champions_mastery_data(
+            api_account["puuid"],
+            self.riot_api.get_champion_mastery(api_account["puuid"])
+        )
 
-        self.riot.set_region(server)
+        self.repo.insert_ranked_data_puuid(
+            api_account["puuid"],
+            self.riot_api.get_league_entries_by_puuid(api_account["puuid"])
+        )
 
-        api_account_data = self.riot.get_account(summoner_name=name, tag=tag)
-        if "puuid" not in api_account_data:
-            return False
-        
-        api_summoner_data = self.riot.get_summoner(puuid=api_account_data["puuid"])
-        puuid = api_account_data["puuid"]
-        game_name = api_account_data["gameName"]
-        tag_line = api_account_data["tagLine"]
-        summoner_level = api_summoner_data["summonerLevel"]
-        profile_icon_id = api_summoner_data["profileIconId"]
-        riot_server = server
-        insert_status = self.repo.insert_account_summoner_data(puuid, game_name, tag_line, summoner_level, profile_icon_id, riot_server)
-        if insert_status == False:
-            return insert_status
-        
-        mastery_data = self.riot.get_champion_mastery(api_account_data["puuid"])
-        insert_status = self.repo.insert_champions_mastery_data(api_account_data["puuid"], mastery_data)
-        if insert_status == False:
-            return insert_status
-        
-        api_ranked_data = self.riot.get_league_entries_by_puuid(api_account_data["puuid"])
-        insert_status = self.repo.insert_ranked_data_puuid(api_account_data["puuid"], api_ranked_data)
-        if insert_status == False:
-            return insert_status
-        
-        return True
+        return self.repo.fetch_account_summoner_data_name(api_account["gameName"], api_account["tagLine"], server)
