@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}
+    jaZZ - Player
+{% endblock %}
+
+{% block content %}
+
+    <p><a href="{{ url_for('league.home') }}">Back to League Services</a></p>
+
+    <p><i>> last update: {{ player.account_summoner_data["last_updated"] }} EDT</i></p>
+    <p><i>> jaZZ ID: *{{ player.jazz_id }}*</i></p>
+
+    <p>{{ player.name }}</p>
+    <p>Level: {{ player.account_summoner_data["summoner_level"] }}</p>
+
+    <h2>Ranks</h2>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Queue</th>
+                <th>Rank</th>
+                <th>Winrate</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entry in player.ranked_data %}
+            <tr>
+                <td>{{ entry["queue_type"] }}</td>
+                <td>{{ entry["tier"] }} {{ entry["division"] }} {{ entry["league_points"] }}LP</td>
+                <td>({{ entry["wins"] }}W/{{ entry["losses"] }}L)</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+{% endblock %}
+
+{% block page_specific_js %}
+
+    <script>
+        $(document).ready(function () {
+            // Ranked table
+            $('#rankedTable').DataTable({
+                "order": [[4, "desc"]]
+            });
+        });
+    </script>
+
+{% endblock %}

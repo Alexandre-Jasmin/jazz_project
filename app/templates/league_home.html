@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}
+jaZZ - LoL
+{% endblock %}
+
+{% block content %}
+
+    <h2>Search Summoner</h2>
+    <form id="searchForm" action="/lol/search_summoner" method="post">
+        <label for="summoner">Summoner:</label>
+        <input type="text" id="summoner" name="summoner" value="Blank-3V3" required>
+
+        <label for="server">Server:</label>
+        <select name="server" id="server">
+            <option value="na1">NA</option>
+            <option value="euw1">EUW</option>
+            <option value="kr">KR</option>
+        </select>
+
+        <button type="submit">Search</button>
+    </form>
+
+    <h1>League Services</h1>
+    <ul>
+        <li><a href="{{ url_for('league.home') }}">Arena Tool</a></li>
+        <li><a href="{{ url_for('league.home') }}">Latest League Assets</a></li>
+        <li><a href="{{ url_for('league.home') }}">Pro Player Accounts</a></li>
+        <li><a href="{{ url_for('league.home') }}">Ranked Ladders</a></li>
+    </ul>
+
+{% endblock %}
+
+{% block page_specific_js %}
+{% endblock %}
