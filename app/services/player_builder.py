@@ -22,9 +22,12 @@ class PlayerBuilder:
 
         champion_mastery = self.repo.fetch_champion_mastery_puuid(data["puuid"])
         ranked = self.repo.fetch_ranked_data_puuid(data["puuid"])
-        #challenges
+        challenges = self.repo.fetch_challenges_data_puuid(data["puuid"])
+        #recent matches (20) (stats) + show more
+        #live game
+        #recently played with
 
-        return LeaguePlayer(data, champion_mastery, ranked)
+        return LeaguePlayer(data, champion_mastery, ranked, challenges)
     
     def _is_stale(self, last_updated: datetime) -> bool:
         return last_updated < datetime.now() - timedelta(hours=24)
@@ -57,7 +60,14 @@ class PlayerBuilder:
             self.riot_api.get_league_entries_by_puuid(api_account["puuid"])
         )
 
+        self.repo.insert_challenges_data_puuid(
+            api_account["puuid"],
+            self.riot_api.get_challenges(api_account["puuid"])
+        )
+
         #challenges
-        # self.repo.insert_challenges_data_puuid()
+        #recent matches (20) (stats) + show more
+        #live game
+        #recently played with
 
         return self.repo.fetch_account_summoner_data_name(api_account["gameName"], api_account["tagLine"], server)

@@ -3,7 +3,7 @@ from app.utilities import LeagueUtilities, BasicUtilities
 
 class LeaguePlayer:
 
-    def __init__(self, account_summoner_data, champion_mastery_data, ranked_data):
+    def __init__(self, account_summoner_data, champion_mastery_data, ranked_data, challenges_data):
 
         # setup static data
         self.league_utils = LeagueUtilities()
@@ -15,6 +15,7 @@ class LeaguePlayer:
         self.account_summoner_data = account_summoner_data
         self.champion_mastery_data = champion_mastery_data
         self.ranked_data = ranked_data
+        self.challenges_data = challenges_data
         
         # FORMAT DATA
         # name + zz id + server

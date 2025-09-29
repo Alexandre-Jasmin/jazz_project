@@ -61,3 +61,34 @@ class LeaguePlayerRepository:
                      ranked_entry["veteran"], ranked_entry["inactive"], ranked_entry["freshBlood"], ranked_entry["hotStreak"],)
                 )
         return True
+    
+    def fetch_challenges_data_puuid(self, puuid):
+        with DBConnection() as db:
+            cursor = db.execute_sql(
+                "leaguedb/fetch_challenges_data_puuid.sql",
+                (puuid,)
+            )
+            rows = cursor.fetchall()
+        return rows
+    
+    def insert_challenges_data_puuid(self, puuid, challenges_data):
+        with DBConnection() as db:
+            for c in challenges_data["challenges"]:
+                puuid = puuid
+                challenge_id = c["challengeId"]
+                percentile = c["percentile"]
+                challenge_tier = c["level"]
+                challenge_value = c["value"]
+                challenge_time = c.get("achievedTime")
+                if challenge_time is not None:
+                    achieved_time = datetime.datetime.fromtimestamp(challenge_time/1000)
+                else:
+                    achieved_time = None
+                position = c.get("position")
+                players_in_level = c.get("playersInLevel")
+                cursor = db.execute_sql(
+                    "leaguedb/insert_challenges_data.sql",
+                    (puuid, challenge_id, percentile, challenge_tier, challenge_value,
+                     achieved_time, position, players_in_level,)
+                )
+        return True
