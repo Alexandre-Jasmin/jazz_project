@@ -72,3 +72,24 @@ CREATE TABLE ranked_data (
 
     INDEX idx_ranked_puuid_queue_time (puuid, queue_type, snapshot_time)
 );
+
+CREATE TABLE challenges_profile_data (
+
+    puuid               VARCHAR(100)        NOT NULL,
+
+    challenges_level    VARCHAR(20)         NOT NULL,
+    current_points      INT                 NOT NULL,
+    max_points          INT                 NOT NULL,
+    percentile          DECIMAL(5,4)        NULL,
+
+    title               INT                 NULL, -- riot api returns a string, need to transform before insert
+    challenges_picked   VARCHAR(255)        NULL, -- riot api returns a list, need to transform before insert 'id,id,id'
+
+    CONSTRAINT fk_challenges_account FOREIGN KEY (puuid)
+        REFERENCES account_summoner_data(puuid)
+);
+
+
+CREATE TABLE challenges_category_points_data ();
+
+CREATE TABLE challenges_data ();

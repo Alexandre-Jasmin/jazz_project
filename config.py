@@ -10,6 +10,7 @@ class DevelopmentConfig:
     BASE_DIR = Path(__file__).resolve().parent
     DATA_DIR = BASE_DIR / "data"
     BASE_SQL_DIR = BASE_DIR / "sql"
+    DDRAGON_DIR = DATA_DIR / "league" / "ddragon"
 
     RIOT_API_KEY = os.getenv("RIOT_API_KEY")
 

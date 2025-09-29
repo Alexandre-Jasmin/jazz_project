@@ -10,7 +10,7 @@ class PlayerBuilder:
         self.repo = repo
 
     def get_player(self, name: str, tag: str, server: str) -> LeaguePlayer:
-        self.riot_api.set_region
+        self.riot_api.set_region(server)
 
         data = self.repo.fetch_account_summoner_data_name(name, tag, server)
 
@@ -19,11 +19,12 @@ class PlayerBuilder:
 
         champion_mastery = self.repo.fetch_champion_mastery_puuid(data["puuid"])
         ranked = self.repo.fetch_ranked_data_puuid(data["puuid"])
+        #challenges
 
         return LeaguePlayer(data, champion_mastery, ranked)
     
     def _is_stale(self, last_updated: datetime) -> bool:
-        return last_updated < datetime.now() - timedelta(seconds=120)
+        return last_updated < datetime.now() - timedelta(seconds=60)
     
     def _refresh_player(self, name: str, tag: str, server: str) -> dict:
         api_account = self.riot_api.get_account(summoner_name=name, tag=tag)
@@ -52,5 +53,8 @@ class PlayerBuilder:
             api_account["puuid"],
             self.riot_api.get_league_entries_by_puuid(api_account["puuid"])
         )
+
+        #challenges
+        # self.repo.insert_challenges_data_puuid()
 
         return self.repo.fetch_account_summoner_data_name(api_account["gameName"], api_account["tagLine"], server)
