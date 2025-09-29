@@ -1,5 +1,5 @@
 from config import DevelopmentConfig
-from app.utilities import LeagueUtilities
+from app.utilities import LeagueUtilities, BasicUtilities
 
 class LeaguePlayer:
 
@@ -7,6 +7,7 @@ class LeaguePlayer:
 
         # setup static data
         self.league_utils = LeagueUtilities()
+        self.basic_utils = BasicUtilities()
         self.current_patch = self.league_utils.current_patch
         self.current_champion_json = self.league_utils.current_champion_json
         
@@ -16,9 +17,13 @@ class LeaguePlayer:
         self.ranked_data = ranked_data
         
         # FORMAT DATA
-        # name + zz id
+        # name + zz id + server
         self.jazz_id = self.account_summoner_data["puuid"][:5]
         self.name = f'{self.account_summoner_data["game_name"]}#{self.account_summoner_data["tag_line"]}'
+        self.server = self.account_summoner_data["riot_server"]
+
+        #last_update
+        self.update_time_ago = self.basic_utils.time_ago(self.account_summoner_data["last_updated"])
 
         # ranked information
         if not self.ranked_data:

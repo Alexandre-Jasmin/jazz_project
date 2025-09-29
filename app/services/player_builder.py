@@ -14,8 +14,11 @@ class PlayerBuilder:
 
         data = self.repo.fetch_account_summoner_data_name(name, tag, server)
 
-        if not data or self._is_stale(data["last_updated"]):
+        if not data:
+            #brand new, refresh
             data = self._refresh_player(name, tag, server)
+        elif self._is_stale(data["last_updated"]):
+            pass
 
         champion_mastery = self.repo.fetch_champion_mastery_puuid(data["puuid"])
         ranked = self.repo.fetch_ranked_data_puuid(data["puuid"])
@@ -24,7 +27,7 @@ class PlayerBuilder:
         return LeaguePlayer(data, champion_mastery, ranked)
     
     def _is_stale(self, last_updated: datetime) -> bool:
-        return last_updated < datetime.now() - timedelta(seconds=60)
+        return last_updated < datetime.now() - timedelta(hours=24)
     
     def _refresh_player(self, name: str, tag: str, server: str) -> dict:
         api_account = self.riot_api.get_account(summoner_name=name, tag=tag)

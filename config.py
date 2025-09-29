@@ -19,3 +19,5 @@ class DevelopmentConfig:
     LEAGUE_DB_PASSWORD = os.getenv("LEAGUE_DB_PASSWORD")
     LEAGUE_DB_NAME = os.getenv("LEAGUE_DB_NAME")
     LEAGUE_DB_PORT = int(os.getenv("LEAGUE_DB_PORT"))
+
+    SECRET_KEY = os.getenv("FLASK_SECRET_KEY")
