@@ -29,8 +29,8 @@ def start_all_background_workers():
 
     workers = [
         # function, sleep interval, args, kwargs
-        (league_worker.acquire_loop_data, 60, [], {}),
-        (leaguedb_worker.tasks_loop, 60, [], {}),
+        #(league_worker.acquire_loop_data, 3600, [], {}),
+        (leaguedb_worker.tasks_loop, 600, [], {}),
     ]
 
     threads = []

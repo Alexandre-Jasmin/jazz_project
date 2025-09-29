@@ -4,3 +4,4 @@ __pycache__/
 data/
 static/
 testing.py
+launch_stable_version.bat

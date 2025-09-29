@@ -1,3 +1,5 @@
+import datetime
+
 from app.db import DBConnection
 
 class LeagueDbBackgroundWorker:
@@ -10,4 +12,4 @@ class LeagueDbBackgroundWorker:
 
     def _test_league_db_connection(self) -> None:
         with DBConnection() as db:
-            print("Connection to leaguedb is stable")
+            print(f"[{datetime.datetime.now()}] leaguedb.background.worker: connection stable")
