@@ -76,11 +76,15 @@ class LeaguePlayer:
     def _get_chall_map(self, challenge_id: int) -> dict:
         for challenge in current_app.config["CURRENT_CHALLENGES"]:
             if int(challenge["id"]) == challenge_id:
+                #! calculate next threshold
                 return {
                     "name": challenge["name"],
-                    "description": challenge["description"]
+                    "description": challenge["description"],
+                    "next_threshold": 0
                 }
         return {
             "name": "Unknown",
-            "description": "Unknown"
+            "description": "Unknown",
+            "next_threshold": 0
         }
+    
