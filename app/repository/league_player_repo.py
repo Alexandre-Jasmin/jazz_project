@@ -92,3 +92,7 @@ class LeaguePlayerRepository:
                      achieved_time, position, players_in_level,)
                 )
         return True
+    
+    def insert_match_data(self, match_data):
+        #! this def should manage all match tables, (match, teams+bans+objectives(atakhan?), participants+challenges+perks, timeline?
+        pass

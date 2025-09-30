@@ -65,7 +65,6 @@ class PlayerBuilder:
             self.riot_api.get_challenges(api_account["puuid"])
         )
 
-        #challenges
         #recent matches (20) (stats) + show more
         #live game
         #recently played with
