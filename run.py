@@ -7,6 +7,4 @@ current_version = ddragon_updater.update_league_assets()
 app = create_flask_app()
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8000, debug=True)
-
-#add image icon to champion mastery
+    app.run(host="localhost", port=8000, debug=True)

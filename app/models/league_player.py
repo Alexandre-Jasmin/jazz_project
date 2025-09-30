@@ -1,15 +1,14 @@
 from config import DevelopmentConfig
 from app.utilities import LeagueUtilities, BasicUtilities
+from flask import current_app
 
 class LeaguePlayer:
 
     def __init__(self, account_summoner_data, champion_mastery_data, ranked_data, challenges_data):
 
         # setup static data
-        self.league_utils = LeagueUtilities()
         self.basic_utils = BasicUtilities()
-        self.current_patch = self.league_utils.current_patch
-        self.current_champion_json = self.league_utils.current_champion_json
+        self.current_patch = current_app.config["CURRENT_PATCH"]
         
         # setup received data
         self.account_summoner_data = account_summoner_data
@@ -32,7 +31,7 @@ class LeaguePlayer:
         else:
             self.player_is_ranked = True
         for entry in self.ranked_data:
-            entry["queue_name"] = self._map_queue(entry["queue_type"])
+            entry["queue_name"] = entry["queue_type"]#!
             w, l = entry["wins"], entry["losses"]
             if w+l == 0:
                 entry["win_rate"] = "NaN"
@@ -46,10 +45,8 @@ class LeaguePlayer:
             self.player_has_champion_mastery = True
         for entry in self.champion_mastery_data:
             champion_id = entry["champion_id"]
-            champion_name = self._map_champion_key(champion_id)
-            entry["champion_name"] = champion_name
-            champion_icon_name = self._map_champion_icon(champion_id)
-            entry["champion_icon_name"] = champion_icon_name
+            entry["champion_name"] = self._get_champion_map(champion_id)["name"]
+            entry["champion_icon_name"] = self._get_champion_map(champion_id)["id"]
 
         # challenges
         if not self.challenges_data:
@@ -57,13 +54,33 @@ class LeaguePlayer:
         else:
             self.player_has_challenges = True
         for challenge in self.challenges_data:
-            pass
+            challenge_id = int(challenge["challenge_id"])
+            challenge["name"] = self._get_chall_map(challenge_id)["name"]
+            challenge["percentile_percentage"] = round((challenge["percentile"]*100), 1)
+            challenge["description"] = self._get_chall_map(challenge_id)["description"]
+            challenge["max_value"] = 0
+            challenge["image"] = f"league/ddragon/{self.current_patch}/img/challenges-images/{challenge_id}-{challenge['challenge_tier']}.png"
 
-    def _map_champion_key(self, champion_id: int) -> str:
-        return self.league_utils.champion_id_to_name_dict.get(champion_id, "Unknown")
-    
-    def _map_queue(self, queue_type: str) -> str:
-        return self.league_utils.queue_mapping.get(queue_type, "Unknown")
-    
-    def _map_champion_icon(self, champion_id: int) -> str:
-        return self.league_utils.champion_id_to_icon.get(champion_id, "Unknown")
+    def _get_champion_map(self, champion_id: int) -> dict:
+        for champ in current_app.config["CHAMPION_DATA"]["data"].values():
+            if int(champ["key"]) == champion_id:
+                return {
+                    "name": champ["name"],
+                    "id": champ["id"]
+                }
+        return {
+            "name": "Unknown",
+            "id": "Unknown"
+        }
+
+    def _get_chall_map(self, challenge_id: int) -> dict:
+        for challenge in current_app.config["CURRENT_CHALLENGES"]:
+            if int(challenge["id"]) == challenge_id:
+                return {
+                    "name": challenge["name"],
+                    "description": challenge["description"]
+                }
+        return {
+            "name": "Unknown",
+            "description": "Unknown"
+        }

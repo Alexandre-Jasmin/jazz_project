@@ -20,3 +20,9 @@ def get_current_champion_data():
     current_patch = _get_latest_patch_dir()
     with open(DevelopmentConfig.DDRAGON_DIR / current_patch / current_patch / "data" / "en_US" / "champion.json", "r", encoding="utf-8") as f:
         return json.load(f)
+    
+@lru_cache
+def get_current_challenges_data():
+    current_patch = _get_latest_patch_dir()
+    with open(DevelopmentConfig.DDRAGON_DIR / current_patch / current_patch / "data" / "en_US" / "challenges.json", "r", encoding="utf-8") as f:
+        return json.load(f)

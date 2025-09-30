@@ -9,46 +9,6 @@ from config import DevelopmentConfig
 
 class LeagueUtilities:
 
-    def __init__(self):
-
-        # setup current patch
-        path = DevelopmentConfig.DDRAGON_DIR
-        p = Path(path)
-        dirs = [d.name for d in p.iterdir() if d.is_dir()]
-        self.current_patch = dirs[-1]
-
-        # current champion.json
-        self.current_champion_json = self._load_current_champion_json()
-
-        # current champion map
-        champion_data = self.current_champion_json["data"]
-        
-        self.champion_id_to_name_dict = {
-            int(champ["key"]): champ["name"]
-            for champ in champion_data.values()
-        }
-        self.champion_id_to_icon = {
-            int(champ["key"]): champ["id"]
-            for champ in champion_data.values()
-        }
-
-        # queue mapping
-        self.queue_mapping = {
-            "RANKED_SOLO_5x5": "Solo/Duo Queue",
-            "RANKED_FLEX_SR": "Flex Queue"
-        }
-
-        #challenges
-        self.challenges_data = self._load_current_challenges_json()
-
-    def _load_current_champion_json(self) -> dict:
-        with open(DevelopmentConfig.DDRAGON_DIR / self.current_patch / self.current_patch / "data" / "en_US" / "champion.json", "r", encoding="utf-8") as f:
-            return json.load(f)
-        
-    def _load_current_challenges_json(self) -> dict:
-        with open(DevelopmentConfig.DDRAGON_DIR / self.current_patch / self.current_patch / "data" / "en_US" / "challenges.json", "r", encoding="utf-8") as f:
-            return json.load(f)
-
     def split_summoner_name(self, summoner_name: str) -> tuple:
         try:
             match = re.split(r'[^a-zA-Z0-9 ]+', summoner_name)
@@ -74,9 +34,6 @@ class LeagueUtilities:
             parts.append(f"{seconds}s")
 
         return " ".join(parts)
-    
-    def map_champion_key_to_champion_name(self, champion_id: int) -> str:
-        pass
 
 class BasicUtilities:
 
