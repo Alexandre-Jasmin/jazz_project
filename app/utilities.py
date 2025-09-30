@@ -22,8 +22,13 @@ class LeagueUtilities:
 
         # current champion map
         champion_data = self.current_champion_json["data"]
+        
         self.champion_id_to_name_dict = {
             int(champ["key"]): champ["name"]
+            for champ in champion_data.values()
+        }
+        self.champion_id_to_icon = {
+            int(champ["key"]): champ["id"]
             for champ in champion_data.values()
         }
 
@@ -33,8 +38,15 @@ class LeagueUtilities:
             "RANKED_FLEX_SR": "Flex Queue"
         }
 
+        #challenges
+        self.challenges_data = self._load_current_challenges_json()
+
     def _load_current_champion_json(self) -> dict:
         with open(DevelopmentConfig.DDRAGON_DIR / self.current_patch / self.current_patch / "data" / "en_US" / "champion.json", "r", encoding="utf-8") as f:
+            return json.load(f)
+        
+    def _load_current_challenges_json(self) -> dict:
+        with open(DevelopmentConfig.DDRAGON_DIR / self.current_patch / self.current_patch / "data" / "en_US" / "challenges.json", "r", encoding="utf-8") as f:
             return json.load(f)
 
     def split_summoner_name(self, summoner_name: str) -> tuple:

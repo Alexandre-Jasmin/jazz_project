@@ -10,6 +10,7 @@
 
     <!-- Info -->
     <p><i>> last update: {{ player.account_summoner_data["last_updated"] }} EDT ({{ player.update_time_ago }})</i></p>
+    <p><i>> current patch: {{ player.current_patch }}</i></p>
     <!-- <p><i>> jaZZ ID: *{{ player.jazz_id }}*</i></p> -->
 
     <!-- Refresh Option -->
@@ -17,10 +18,11 @@
         <button type="submit" class="btn btn-primary">Refresh Profile</button>
     </form><br>
 
+    <!-- Profile Information -->
     <table border="1">
         <thead>
             <tr>
-                <th colspan="2"><img src="https://ddragon.leagueoflegends.com/cdn/15.19.1/img/profileicon/{{ player.account_summoner_data['profile_icon_id'] }}.png" alt="Description" width="150"></th>
+                <th colspan="2"><img src="https://ddragon.leagueoflegends.com/cdn/{{ player.current_patch }}/img/profileicon/{{ player.account_summoner_data['profile_icon_id'] }}.png" alt="Description" width="150"></th>
             </tr>
         </thead>
         <tbody>
@@ -45,7 +47,7 @@
             <tbody>
                 {% for entry in player.ranked_data %}
                 <tr>
-                    <td>{{ entry["queue_name"] }}</td>
+                    <td>{{ entry["queue_name"] }}</td> 
                     <td>{{ entry["tier"] }} {{ entry["division"] }} {{ entry["league_points"] }}LP</td>
                     <td>({{ entry["wins"] }}W/{{ entry["losses"] }}L) [{{ entry["win_rate"] }}%]</td>
                 </tr>
@@ -71,7 +73,7 @@
             <tbody>
                 {% for entry in player.champion_mastery_data %}
                 <tr>
-                    <td>{{ entry["champion_name"] }}</td>
+                    <td><img src="https://ddragon.leagueoflegends.com/cdn/{{ player.current_patch }}/img/champion/{{ entry['champion_icon_name'] }}.png" width="30px" height="30px"> {{ entry["champion_name"] }}</td>
                     <td>{{ entry["champion_level"] }}</td>
                     <td>{{ entry["champion_points"] }}</td>
                     <td>{{ entry["last_play_time"] }}</td>

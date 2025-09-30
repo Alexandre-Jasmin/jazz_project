@@ -48,9 +48,22 @@ class LeaguePlayer:
             champion_id = entry["champion_id"]
             champion_name = self._map_champion_key(champion_id)
             entry["champion_name"] = champion_name
+            champion_icon_name = self._map_champion_icon(champion_id)
+            entry["champion_icon_name"] = champion_icon_name
+
+        # challenges
+        if not self.challenges_data:
+            self.player_has_challenges = False
+        else:
+            self.player_has_challenges = True
+        for challenge in self.challenges_data:
+            pass
 
     def _map_champion_key(self, champion_id: int) -> str:
         return self.league_utils.champion_id_to_name_dict.get(champion_id, "Unknown")
     
     def _map_queue(self, queue_type: str) -> str:
         return self.league_utils.queue_mapping.get(queue_type, "Unknown")
+    
+    def _map_champion_icon(self, champion_id: int) -> str:
+        return self.league_utils.champion_id_to_icon.get(champion_id, "Unknown")
