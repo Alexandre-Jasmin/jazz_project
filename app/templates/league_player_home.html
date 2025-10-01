@@ -1,20 +1,22 @@
 {% extends "base.html" %}
 
 {% block title %}
-    ZZ - {{ player.name }}
+    ZZ - {{ player.profile.name }}
 {% endblock %}
 
 {% block content %}
 
+    <p>{{ player.profile.jazz_id }}</p>
+
     <p><a href="{{ url_for('league.home') }}">Back to League Services</a></p>
 
     <!-- Info -->
-    <p><i>> last update: {{ player.account_summoner_data["last_updated"] }} EDT ({{ player.update_time_ago }})</i></p>
+    <p><i>> last update: {{ player.profile.last_updated }} EDT ({{ player.profile.last_update_time_ago }})</i></p>
     <p><i>> current patch: {{ player.current_patch }}</i></p>
     <!-- <p><i>> jaZZ ID: *{{ player.jazz_id }}*</i></p> -->
 
     <!-- Refresh Option -->
-    <form action="{{ url_for('league.refresh_summoner', server=player.server, summoner_name=player.name) }}" method="post">
+    <form action="{{ url_for('league.refresh_summoner', server=player.profile.server, summoner_name=player.profile.name) }}" method="post">
         <button type="submit" class="btn btn-primary">Refresh Profile</button>
     </form><br>
 
@@ -27,14 +29,14 @@
         </thead>
         <tbody>
             <tr>
-                <td align="center">{{ player.account_summoner_data["game_name"] }}<br>{{ player.account_summoner_data["tag_line"] }}</td>
-                <td align="center">Lvl: {{ player.account_summoner_data["summoner_level"] }}</td>
+                <td align="center">{{ player.profile.game_name }}<br>{{ player.profile.tag_line }}</td>
+                <td align="center">Lvl: {{ player.profile.level }}</td>
             </tr>
         </tbody>
     </table>
 
     <!-- Rank -->
-    {% if player.player_is_ranked %}
+    {% if player.ranks.player_is_ranked %}
         <h2>Ranks</h2>
         <table border="1">
             <thead>
@@ -45,7 +47,7 @@
                 </tr>
             </thead>
             <tbody>
-                {% for entry in player.ranked_data %}
+                {% for entry in player.ranks.data %}
                 <tr>
                     <td>{{ entry["queue_name"] }}</td> 
                     <td>{{ entry["tier"] }} {{ entry["division"] }} {{ entry["league_points"] }}LP</td>
@@ -59,7 +61,7 @@
     {% endif %}
 
     <!-- Champion Mastery -->
-    {% if player.player_has_champion_mastery %}
+    {% if player.champion_mastery.player_has_champion_mastery %}
         <h2>Champion Mastery</h2>
         <table id="masteryTable" class="display">
             <thead>
@@ -71,9 +73,9 @@
                 </tr>
             </thead>
             <tbody>
-                {% for entry in player.champion_mastery_data %}
+                {% for entry in player.champion_mastery.data %}
                 <tr>
-                    <td><img src="https://ddragon.leagueoflegends.com/cdn/{{ player.current_patch }}/img/champion/{{ entry['champion_icon_name'] }}.png" width="30px" height="30px"> {{ entry["champion_name"] }}</td>
+                    <td><img data-src="https://ddragon.leagueoflegends.com/cdn/{{ player.current_patch }}/img/champion/{{ entry['champion_icon_name'] }}.png" class="lazyload" width="30" height="30"> {{ entry["champion_name"] }}</td>
                     <td>{{ entry["champion_level"] }}</td>
                     <td>{{ entry["champion_points"] }}</td>
                     <td>{{ entry["last_play_time"] }}</td>
@@ -86,7 +88,7 @@
     {% endif %}
 
     <!-- Challenges -->
-    {% if player.player_has_challenges %}
+    {% if player.challenges.player_has_challenges %}
         <h2>Challenges</h2>
         <table id="challengesTable" class="display">
             <thead>
@@ -97,9 +99,9 @@
                 </tr>
             </thead>
             <tbody>
-                {% for entry in player.challenges_data %}
+                {% for entry in player.challenges.data %}
                 <tr>
-                    <td><img src="{{ url_for('main.data_file', filename=entry['image']) }}" alt="No Image" width="30px" height="30px"> {{ entry["name"] }}<br>Top: {{ entry["percentile_percentage"] }}% | {{ entry["challenge_value"] }} / {{ entry["max_value"] }}</td>
+                    <td><img data-src="{{ url_for('main.data_file', filename=entry['image']) }}" class="lazyload" width="30" height="30"> {{ entry["name"] }}<br>Top: {{ entry["percentile_percentage"] }}% | {{ entry["challenge_value"] }} / {{ entry["max_value"] }}</td>
                     <td>{{ entry["description"] }}</td>
                     <td>{{ entry["challenge_tier"] }}</td>
                 </tr>
@@ -126,13 +128,15 @@
             // Champion Mastery
             $('#masteryTable').DataTable({
                 "order": [[2, "desc"]],
+                //"deferRender": true,
                 'columnDefs': [{
                     "targets": 2,
                     "render": $.fn.dataTable.render.number(',', '.', 0)
                 },]
             });
             $('#challengesTable').DataTable({
-                "order": [[3, "desc"]],
+                //"order": [[3, "desc"]],
+                //"deferRender": true,
                 'columnDefs': [{
                     "targets": 2,
                 },]

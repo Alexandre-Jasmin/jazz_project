@@ -1,24 +1,28 @@
 import os
 import pymysql
 
-from config import DevelopmentConfig
+from config import DevelopmentConfig, LeagueDBConfig
 
-def get_connection():
+def get_connection(config=LeagueDBConfig):
     return pymysql.connect(
-        host=DevelopmentConfig.LEAGUE_DB_HOST,
-        user=DevelopmentConfig.LEAGUE_DB_USER,
-        password=DevelopmentConfig.LEAGUE_DB_PASSWORD,
-        database=DevelopmentConfig.LEAGUE_DB_NAME,
-        port=DevelopmentConfig.LEAGUE_DB_PORT,
+        host=config.HOST,
+        user=config.USER,
+        password=config.PASSWORD,
+        database=config.NAME,
+        port=config.PORT,
         cursorclass=pymysql.cursors.DictCursor
     )
 
-def load_sql(filename: str) -> str:
-    file_path = os.path.join(DevelopmentConfig.BASE_SQL_DIR, filename)
+def load_sql(filename: str, config=LeagueDBConfig) -> str:
+    file_path = os.path.join(config.BASE_SQL_DIR, filename)
     with open(file_path, "r", encoding="utf-8") as f:
         return f.read()
 
 class DBConnection:
+
+    def __init__(self, config=LeagueDBConfig):
+        self.config = config
+
     def __enter__(self):
         self.conn = get_connection()
         self.cursor = self.conn.cursor()
@@ -33,7 +37,7 @@ class DBConnection:
         self.conn.close()
 
     def execute_sql(self, filename: str, params: tuple = ()):
-        sql = load_sql(filename)
+        sql = load_sql(filename, self.config)
         self.cursor.execute(sql, params)
         return self.cursor
 

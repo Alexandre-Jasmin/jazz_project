@@ -21,3 +21,13 @@ class DevelopmentConfig:
     LEAGUE_DB_PORT = int(os.getenv("LEAGUE_DB_PORT"))
 
     SECRET_KEY = os.getenv("FLASK_SECRET_KEY")
+
+class LeagueDBConfig:
+
+    BASE_DIR = Path(__file__).resolve().parent
+    HOST = os.getenv("LEAGUE_DB_HOST")
+    USER = os.getenv("LEAGUE_DB_USER")
+    PASSWORD = os.getenv("LEAGUE_DB_PASSWORD")
+    NAME = os.getenv("LEAGUE_DB_NAME")
+    PORT = int(os.getenv("LEAGUE_DB_PORT"))
+    BASE_SQL_DIR = BASE_DIR / "sql" / "leaguedb"
