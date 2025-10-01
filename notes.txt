@@ -1,0 +1,89 @@
+Got it 👍 I see the comments you left in your code — let me walk through them and suggest how to implement those missing parts properly.
+
+---
+
+### 1. **"utilities should handle downloading and extracting code"**
+
+Right now, your `DataDragonUpdater` does all the downloading and extracting. Since you already import `BasicUtilities`, you could move this logic there. For example, `BasicUtilities` could expose methods like:
+
+```python
+class BasicUtilities:
+
+    @staticmethod
+    def download_file(url: str, dest_path: Path):
+        import requests
+        response = requests.get(url, stream=True)
+        response.raise_for_status()
+        with open(dest_path, "wb") as f:
+            for chunk in response.iter_content(chunk_size=8192):
+                f.write(chunk)
+
+    @staticmethod
+    def extract_tar_gz(archive_path: Path, dest_path: Path):
+        import tarfile
+        with tarfile.open(archive_path, "r:gz") as tar:
+            tar.extractall(path=dest_path)
+
+    @staticmethod
+    def extract_zip(archive_path: Path, dest_path: Path):
+        import zipfile
+        with zipfile.ZipFile(archive_path, "r") as zip_ref:
+            zip_ref.extractall(dest_path)
+```
+
+Then inside your updater you’d just call:
+
+```python
+BasicUtilities.download_file(url, archive_path)
+BasicUtilities.extract_tar_gz(archive_path, NEW_DDRAGON_DIR)
+```
+
+Cleaner, and keeps responsibilities separated ✅
+
+---
+
+### 2. **"we also need to get the latest ranked emblems"**
+
+Riot provides this here:
+👉 `https://static.developer.riotgames.com/docs/lol/ranked-emblems-latest.zip`
+
+You’d want to grab that ZIP every update and extract it somewhere. Since the ddragon assets are patch-specific, but the ranked emblems are just “latest,” you could do something like:
+
+```python
+RANKED_EMBLEMS_URL = "https://static.developer.riotgames.com/docs/lol/ranked-emblems-latest.zip"
+
+def update_ranked_emblems(self, patch_dir: Path):
+    archive_path = DATA_DIR / "ranked_emblems.zip"
+    print(f"Downloading ranked emblems from {RANKED_EMBLEMS_URL} ...")
+    BasicUtilities.download_file(RANKED_EMBLEMS_URL, archive_path)
+
+    print("Extracting ranked emblems ...")
+    emblem_dir = patch_dir / "ranked_emblems"
+    emblem_dir.mkdir(exist_ok=True)
+    BasicUtilities.extract_zip(archive_path, emblem_dir)
+
+    archive_path.unlink()
+    print(f"Ranked emblems extracted to {emblem_dir}")
+```
+
+And call it from inside `update_league_assets()`:
+
+```python
+self.update_ranked_emblems(NEW_DDRAGON_DIR)
+```
+
+---
+
+### 3. **"extract inside current_patch"**
+
+Good note. Right now, you’re just extracting everything from the `.tgz` directly into the new patch folder. That’s fine, but some ddragon archives include a root directory. You might want to verify if extraction lands files at:
+
+```
+.../ddragon/{version}/dragontail-<version>/...
+```
+
+If so, you probably want to strip that root directory so everything lands **directly** inside `.../ddragon/{version}`. That can be handled by iterating over `tar.getmembers()` and trimming their `name`.
+
+---
+
+👉 Do you want me to refactor your `update_league_assets()` now so it uses `BasicUtilities` and also downloads + extracts the ranked emblems inside the new patch folder?
