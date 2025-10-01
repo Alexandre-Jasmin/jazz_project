@@ -1,8 +1,9 @@
 import os
 import pymysql
 
-from config import DevelopmentConfig, LeagueDBConfig
+from config import LeagueDBConfig
 
+# dbconnection will naturally connect to leaguedb if no other config is given
 def get_connection(config=LeagueDBConfig):
     return pymysql.connect(
         host=config.HOST,

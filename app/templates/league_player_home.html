@@ -6,8 +6,6 @@
 
 {% block content %}
 
-    <p>{{ player.profile.jazz_id }}</p>
-
     <p><a href="{{ url_for('league.home') }}">Back to League Services</a></p>
 
     <!-- Info -->
@@ -96,20 +94,22 @@
                     <th>Challenge</th>
                     <th>Description</th>
                     <th>Tier</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
                 {% for entry in player.challenges.data %}
                 <tr>
-                    <td><img data-src="{{ url_for('main.data_file', filename=entry['image']) }}" class="lazyload" width="30" height="30"> {{ entry["name"] }}<br>Top: {{ entry["percentile_percentage"] }}% | {{ entry["challenge_value"] }} / {{ entry["max_value"] }}</td>
+                    <td><img data-src="{{ url_for('main.data_file', filename=entry['image']) }}" class="lazyload" width="30" height="30"> {{ entry["name"] }}<br>Top: {{ entry["percentile_percentage"] }}% | {{ entry["challenge_value"] }} / {{ entry["next_threshold"] }}</td>
                     <td>{{ entry["description"] }}</td>
                     <td>{{ entry["challenge_tier"] }}</td>
+                    <td>{{ entry["percentile"] }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     {% else %}
-        <h2>*No Champion Mastery</h2>
+        <h2>*No Challenges</h2>
     {% endif %}
 
 
@@ -128,18 +128,17 @@
             // Champion Mastery
             $('#masteryTable').DataTable({
                 "order": [[2, "desc"]],
-                //"deferRender": true,
                 'columnDefs': [{
                     "targets": 2,
                     "render": $.fn.dataTable.render.number(',', '.', 0)
                 },]
             });
             $('#challengesTable').DataTable({
-                //"order": [[3, "desc"]],
-                //"deferRender": true,
-                'columnDefs': [{
-                    "targets": 2,
-                },]
+                "order": [[3, "desc"]],
+                'columnDefs': [
+                    { "targets": 3, "visible": false }
+                    
+                ]
             });
         });
     </script>

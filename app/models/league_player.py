@@ -67,11 +67,38 @@ class LeaguePlayerChallenges:
                 if not challenge_dict:
                     challenge["description"] = challenge_id
                     continue
+                threshold_dict = self._find_thresholds(challenge["challenge_value"], challenge_dict)
+                challenge["next_threshold"] = threshold_dict["next_threshold"]
                 challenge["name"] = challenge_dict["name"]
                 challenge["percentile_percentage"] = round((challenge["percentile"]*100), 1)
                 challenge["description"] = challenge_dict["description"]
                 challenge["max_value"] = 0
                 challenge["image"] = f"league/ddragon/{self.current_patch}/img/challenges-images/{challenge_id}-{challenge['challenge_tier']}.png"
+
+    def _find_thresholds(self, current_value: int, challenge_dict: dict) -> dict:
+
+        thresholds = challenge_dict["thresholds"]
+        levels = [(level, data["value"]) for level, data in thresholds.items()]
+        levels.sort(key=lambda x: x[1])
+
+        last_reached = 0
+        next_threshold = 0
+        furthest_threshold = levels[-1]  # highest one
+
+        for level, value in levels:
+            if value <= current_value:
+                last_reached = value
+            elif value > current_value and next_threshold is 0:
+                next_threshold = value
+
+        if next_threshold == 0:
+            next_threshold = last_reached
+
+        return {
+            "last_reached": last_reached,
+            "next_threshold": next_threshold,
+            "furthest_threshold": furthest_threshold,
+        }
 
 class LeaguePlayer:
 

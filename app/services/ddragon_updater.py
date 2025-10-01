@@ -58,4 +58,8 @@ class DataDragonUpdater:
         archive_path.unlink()
         print("Cleaned archive")
 
+        #! we also need to get the latest ranked emblems
+        #! extract inside current_patch
+        #! https://static.developer.riotgames.com/docs/lol/ranked-emblems-latest.zip
+
         return latest_version
