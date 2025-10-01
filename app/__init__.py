@@ -6,7 +6,7 @@ from .routes import register_blueprints
 from app.services.riot_service import RiotService
 from app.services.background_workers.leaguedb_background_worker import LeagueDbBackgroundWorker
 from app.services.background_workers.league_background_worker import LeagueBackgroundWorker
-from app.services.league_static_data import get_current_patch, get_current_champion_data, get_current_challenges_data
+from app.services.league_static_data import LeagueStaticDataService
 
 def run_worker(task_func, sleeping_time: int = 60, *args, **kwargs):
     while True:
@@ -31,7 +31,7 @@ def start_all_background_workers():
     workers = [
         # function, sleep interval, args, kwargs
         #(league_worker.acquire_loop_data, 3600, [], {}),
-        (leaguedb_worker.tasks_loop, 600, [], {}),
+        (leaguedb_worker.tasks_loop, 1800, [], {}),
     ]
 
     threads = []
@@ -47,9 +47,10 @@ def create_flask_app(config: str = "config.DevelopmentConfig") -> Flask:
     start_all_background_workers()
 
     # Setup current league static data
-    app.config["CURRENT_PATCH"] = get_current_patch()
-    app.config["CHAMPION_DATA"] = get_current_champion_data()
-    app.config["CURRENT_CHALLENGES"] = get_current_challenges_data()
+    LeagueStaticDataService.load()
+
+    # StaticDataService.load()
+    app.config["STATIC_DATA"] = 0
 
     register_blueprints(app)
 
