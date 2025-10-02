@@ -86,3 +86,24 @@ class BasicUtilities:
     def dump_json_file(self, file_path: str | Path, my_data: Any) -> None:
         with open(file_path, "w", encoding="utf-8") as f:
             json.dump(my_data, f, indent=4)
+
+    @staticmethod
+    def download_file(url: str, dest_path: Path):
+        import requests
+        response = requests.get(url, stream=True)
+        response.raise_for_status()
+        with open(dest_path, "wb") as f:
+            for chunk in response.iter_content(chunk_size=8192):
+                f.write(chunk)
+
+    @staticmethod
+    def extract_tar_gz(archive_path: Path, dest_path: Path):
+        import tarfile
+        with tarfile.open(archive_path, "r:gz") as tar:
+            tar.extractall(path=dest_path)
+
+    @staticmethod
+    def extract_zip(archive_path: Path, dest_path: Path):
+        import zipfile
+        with zipfile.ZipFile(archive_path, "r") as zip_ref:
+            zip_ref.extractall(dest_path)

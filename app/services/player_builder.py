@@ -33,6 +33,8 @@ class PlayerBuilder:
         return last_updated < datetime.now() - timedelta(hours=24)
     
     def _refresh_player(self, name: str, tag: str, server: str) -> dict:
+        
+        self.riot_api.set_region(server)
         api_account = self.riot_api.get_account(summoner_name=name, tag=tag)
         if not api_account:
             raise ValueError("Account not found")

@@ -1,7 +1,7 @@
 from pathlib import Path
 import requests
 import tarfile
-from app.utilities import BasicUtilities #! utilities should handle downloading and extracting code
+from app.utilities import BasicUtilities
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 DDRAGON_DIR = DATA_DIR / "league" / "ddragon"
@@ -12,54 +12,42 @@ class DataDragonUpdater:
     def __init__(self):
         pass
 
-    def get_local_version(self) -> str:
-        path = DDRAGON_DIR
-        p = Path(path)
-        dirs = [d.name for d in p.iterdir() if d.is_dir()]
-        return dirs[-1]
+    def _get_local_ddragon_version(self) -> str:
+        try:
+            p = Path(DDRAGON_DIR)
+            dirs = [d.name for d in p.iterdir() if d.is_dir()]
+            return dirs[-1]
+        except:
+            return None
+    
+    def _get_latest_ddragon_version(self) -> str | None:
+        try:
+            response = requests.get(DDRAGON_VERSIONS_URL)
+            versions = response.json()
+            return versions[0]
+        except:
+            return None
+    
+    def update_ddragon_assets(self) -> tuple:
+        latest_version = self._get_latest_ddragon_version()
+        local_version = self._get_local_ddragon_version()
 
-    def get_latest_version(self) -> str:
-        response = requests.get(DDRAGON_VERSIONS_URL)
-        versions = response.json()
-        return versions[0]
-
-    def update_league_assets(self) -> str:
-        #* Get latest version of ddragon
-        latest_version = self.get_latest_version()
-        local_version = self.get_local_version()
-
+        if not local_version or not latest_version:
+            return False, "failed to get local_version/latest_version"
+        
         if local_version == latest_version:
-            print(f"ddragon up-to-date ({local_version})")
-            return local_version
-
-        archive_path = DATA_DIR / "dragontail_temp.tgz"
-        url = f"https://ddragon.leagueoflegends.com/cdn/dragontail-{latest_version}.tgz"
-
-        update_choice = input(f"Update available\nLocal Version: {local_version}\nLatest Version: {latest_version}\nUpdate? (y/n)")
-        if update_choice == "n":
-            print("Update Canceled")
-            return local_version
-
-        print(f"Downloading {url} ...")
-        response = requests.get(url, stream=True)
-        with open(archive_path, "wb") as f:
-            for chunk in response.iter_content(chunk_size=8192):
-                f.write(chunk)
-        print(f"Downloaded to {archive_path}")
-
-        print("Extracting ...")
+            return False, f"assets up-to-date ({local_version})"
+        
+        update_choice = input(f"\nUpdate available\nLocal Version: {local_version}\nLatest Version: {latest_version}\nUpdate? (y/n)")#! lower
+        if update_choice != "y":
+            return False, "user input is not yes"
+        
         NEW_DDRAGON_DIR = DDRAGON_DIR / latest_version
-        Path(NEW_DDRAGON_DIR).mkdir()
-        with tarfile.open(archive_path, "r:gz") as tar:
-            tar.extractall(path=NEW_DDRAGON_DIR)
-        print(f"Extracted to {NEW_DDRAGON_DIR}")
+        url = f"https://ddragon.leagueoflegends.com/cdn/dragontail-{latest_version}.tgz"
+        archive_path = DATA_DIR / "dragontail_temp.tgz"
 
-        print("Cleaning archive")
+        BasicUtilities.download_file(url, archive_path)
+        BasicUtilities.extract_tar_gz(archive_path, NEW_DDRAGON_DIR)
         archive_path.unlink()
-        print("Cleaned archive")
 
-        #! we also need to get the latest ranked emblems
-        #! extract inside current_patch
-        #! https://static.developer.riotgames.com/docs/lol/ranked-emblems-latest.zip
-
-        return latest_version
+        return True, latest_version

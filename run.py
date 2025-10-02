@@ -3,7 +3,8 @@ from app.services.ddragon_updater import DataDragonUpdater
 
 # before creating application, make sure assets are up to date
 ddragon_updater = DataDragonUpdater()
-current_version = ddragon_updater.update_league_assets()
+status, message = ddragon_updater.update_ddragon_assets()
+print(message)
 
 app = create_flask_app()
 
