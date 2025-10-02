@@ -20,6 +20,19 @@ CREATE TABLE account_summoner_data (
     UNIQUE KEY unique_name_tag (game_name, tag_line)
 );
 
+--used name+tag to get here
+CREATE TABLE account_data(
+    puuid
+    game_name
+    tag_line
+    first_seen
+    last_updated
+);
+
+CREATE TABLE summoner_data(
+
+);
+
 -- champion_mastery_data.sql
 CREATE TABLE champion_mastery_data (
     
