@@ -1,0 +1,83 @@
+-- account_data
+CREATE TABLE account_data(
+
+    puuid               VARCHAR(100)            PRIMARY KEY,
+    game_name           VARCHAR(50)             NOT NULL,
+    tag_line            VARCHAR(10)             NOT NULL,
+
+    first_seen          TIMESTAMP               NOT NULL            DEFAULT CURRENT_TIMESTAMP,
+    last_updated        TIMESTAMP               NOT NULL            DEFAULT CURRENT_TIMESTAMP,
+
+    UNIQUE KEY unique_name_tag (game_name, tag_line)
+    
+);
+
+-- summoner_data
+CREATE TABLE summoner_data(
+
+    puuid               VARCHAR(100)            PRIMARY KEY,
+    profile_icon_id     INT                     NOT NULL,
+    revision_date       TIMESTAMP               NOT NULL,
+    summoner_level      INT                     NOT NULL,
+    riot_server         VARCHAR(10)             NOT NULL,
+
+    first_seen          TIMESTAMP               NOT NULL            DEFAULT CURRENT_TIMESTAMP,
+    last_updated        TIMESTAMP               NOT NULL            DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_summoner FOREIGN KEY (puuid)
+        REFERENCES account_data(puuid)
+
+);
+
+-- champion_mastery_data
+CREATE TABLE champion_mastery_data (
+    
+    -- unique Riot account ID
+	puuid			    VARCHAR(100)	NOT NULL,
+    
+    -- champion information
+    champion_id		    INT             NOT NULL,
+    champion_level		INT     		NOT NULL,
+    champion_points     INT             NOT NULL,
+    last_play_time      TIMESTAMP       NOT NULL,
+    
+    -- tracking
+    last_updated	    TIMESTAMP		NOT NULL    DEFAULT CURRENT_TIMESTAMP,
+    
+    -- puuid+champion_id is unique
+    PRIMARY KEY (puuid, champion_id),
+
+    CONSTRAINT fk_mastery_account FOREIGN KEY (puuid)
+        REFERENCES summoner_data (puuid)
+);
+
+-- ranked_data
+CREATE TABLE ranked_data (
+
+    id                  BIGINT          AUTO_INCREMENT PRIMARY KEY,
+    
+    -- unique Riot account ID
+	puuid			    VARCHAR(100)	NOT NULL,
+    
+    -- ranked information
+    queue_type		VARCHAR(50)  NOT NULL,
+    tier		    VARCHAR(20)  NOT NULL,
+    division        VARCHAR(5)   NOT NULL,
+    league_points   INT          NOT NULL,
+    wins            INT          NOT NULL,
+    losses          INT          NOT NULL,
+    veteran         BOOLEAN      NOT NULL,
+    inactive        BOOLEAN      NOT NULL,
+    fresh_blood     BOOLEAN      NOT NULL,
+    hot_streak      BOOLEAN      NOT NULL,
+
+    snapshot_time   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    
+    CONSTRAINT fk_ranked_account FOREIGN KEY (puuid)
+        REFERENCES account_summoner_data (puuid),
+
+    -- prevent inserting exact duplicate snapshots
+    UNIQUE KEY uq_ranked_snapshot (puuid, queue_type, snapshot_time),
+
+    INDEX idx_ranked_puuid_queue_time (puuid, queue_type, snapshot_time)
+);

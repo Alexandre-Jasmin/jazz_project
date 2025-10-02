@@ -10,65 +10,55 @@ class PlayerBuilder:
         self.repo = repo
 
     def get_player(self, name: str, tag: str, server: str) -> LeaguePlayer:
-        self.riot_api.set_region(server)
 
-        data = self.repo.fetch_account_summoner_data_name(name, tag, server)
+        account_data = self.repo.fetch_account_with_name_tag(name, tag)
 
-        if not data:
-            #brand new, refresh
-            data = self._refresh_player(name, tag, server)
-        elif self._is_stale(data["last_updated"]):
-            pass
+        if not account_data:
+            # brand new/name_change -                               invalid account
+            account_data = self._refresh_player(name, tag, server)
 
-        champion_mastery = self.repo.fetch_champion_mastery_puuid(data["puuid"])
-        ranked = self.repo.fetch_ranked_data_puuid(data["puuid"])
-        challenges = self.repo.fetch_challenges_data_puuid(data["puuid"])
-        #recent matches (20) (stats) + show more
-        #live game
-        #recently played with
+        summoner_data = self.repo.fetch_summoner_with_puuid_server(account_data["puuid"], server)
+        mastery_data = self.repo.fetch_champ_mastery_with_puuid(account_data["puuid"])
+        #ranked_data = self.repo.fetch_rank_with_puuid(account_data["puuid"])
+        #latest_match_data = self.repo.fetch_matches_with_puuid(account_data["puuid"], 20)
 
-        return LeaguePlayer(data, champion_mastery, ranked, challenges)
-    
-    def _is_stale(self, last_updated: datetime) -> bool:
-        return last_updated < datetime.now() - timedelta(hours=24)
-    
+        return account_data, mastery_data
+
+        return LeaguePlayer(
+            account_data,
+            summoner_data,
+            mastery_data,
+            ranked_data,
+            latest_match_data
+        )
+
     def _refresh_player(self, name: str, tag: str, server: str) -> dict:
-        
+
+        def load_matchlist_data(list_of_match_ids):
+            all_match_data = []
+            for match_id in list_of_match_ids:
+                match_data = self.riot_api.get_match(match_id)
+                match_timeline = self.riot_api.get_match_timeline(match_id)
+                all_match_data.append(match_data, match_timeline)
+            return all_match_data
+
         self.riot_api.set_region(server)
-        api_account = self.riot_api.get_account(summoner_name=name, tag=tag)
-        if not api_account:
+
+        api_account_data = self.riot_api.get_account(summoner_name=name, tag=tag)
+        if not api_account_data:
             raise ValueError("Account not found")
-        
-        api_summoner = self.riot_api.get_summoner(api_account["puuid"])
-        if not api_summoner:
+        self.repo.insert_account_data(api_account_data)
+
+        api_summoner_data = self.riot_api.get_summoner(api_account_data["puuid"])
+        if not api_summoner_data:
             raise ValueError("Summoner not found")
+        self.repo.insert_summoner_data(api_summoner_data, server)
+
+        self.repo.insert_champ_mastery_data(self.riot_api.get_champion_mastery(api_account_data["puuid"]))
+        #self.repo.insert_ranked_data(self.riot_api.get_league_entries_by_puuid(api_account_data["puuid"]))
+        #self.repo.insert_match_from_matchlist(load_matchlist_data(self.riot_api.get_matches_by_puuid(puuid=api_account_data["puuid"], count=20)))
+
+        #! while loop to catch a flask return on self.repo
+
+        return self.repo.fetch_account_with_name_tag(api_account_data["gameName"], api_account_data["tagLine"])
         
-        self.repo.insert_account_summoner_data(
-            api_account["puuid"],
-            api_account["gameName"],
-            api_account["tagLine"],
-            api_summoner["summonerLevel"],
-            api_summoner["profileIconId"],
-            server
-        )
-
-        self.repo.insert_champions_mastery_data(
-            api_account["puuid"],
-            self.riot_api.get_champion_mastery(api_account["puuid"])
-        )
-
-        self.repo.insert_ranked_data_puuid(
-            api_account["puuid"],
-            self.riot_api.get_league_entries_by_puuid(api_account["puuid"])
-        )
-
-        self.repo.insert_challenges_data_puuid(
-            api_account["puuid"],
-            self.riot_api.get_challenges(api_account["puuid"])
-        )
-
-        #recent matches (20) (stats) + show more
-        #live game
-        #recently played with
-
-        return self.repo.fetch_account_summoner_data_name(api_account["gameName"], api_account["tagLine"], server)

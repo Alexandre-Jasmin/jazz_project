@@ -1,12 +1,6 @@
-from config import DevelopmentConfig
-from app.utilities import LeagueUtilities, BasicUtilities
-from flask import current_app
+from app.utilities import BasicUtilities
 
 from app.services.league_static_data import LeagueStaticDataService
-
-# PlayerProfile
-# PlayerChampionMastery
-# PlayerRank
 
 class LeaguePlayerProfile:
 

@@ -22,14 +22,31 @@ CREATE TABLE account_summoner_data (
 
 --used name+tag to get here
 CREATE TABLE account_data(
-    puuid
-    game_name
-    tag_line
-    first_seen
-    last_updated
+
+    puuid               VARCHAR(100)            PRIMARY KEY,
+    game_name           VARCHAR(50)             NOT NULL,
+    tag_line            VARCHAR(10)             NOT NULL,
+
+    first_seen          TIMESTAMP               NOT NULL            DEFAULT CURRENT_TIMESTAMP,
+    last_updated        TIMESTAMP               NOT NULL            DEFAULT CURRENT_TIMESTAMP
+
+    UNIQUE KEY unique_name_tag (game_name, tag_line)
+    
 );
 
 CREATE TABLE summoner_data(
+
+    puuid               VARCHAR(100)            NOT NULL,
+    profile_icon_id     INT                     NOT NULL,
+    revision_date       TIMESTAMP               NOT NULL,
+    summoner_level      INT                     NOT NULL,
+    riot_server         VARCHAR(10)             NOT NULL
+
+    first_seen          TIMESTAMP               NOT NULL,
+    last_updated        TIMESTAMP               NOT NULL,
+
+    CONSTRAINT fk_summoner FOREIGN KEY (puuid)
+        REFERENCES account_data(puuid)
 
 );
 

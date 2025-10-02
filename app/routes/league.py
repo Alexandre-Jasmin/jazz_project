@@ -1,12 +1,11 @@
 from datetime import datetime, timedelta
-from flask import Blueprint, render_template, request, redirect, url_for, flash, send_from_directory
+from flask import Blueprint, render_template, request, redirect, url_for, flash
 
 from app.services import RiotService, PlayerBuilder
 from app.repository.league_player_repo import LeaguePlayerRepository
 from app.utilities import LeagueUtilities
-from config import DevelopmentConfig
 
-league = Blueprint("league", __name__, url_prefix="/lol")
+league = Blueprint("league", __name__, url_prefix="/lol", template_folder="../templates/league")
 
 riot_service = RiotService()
 player_repo = LeaguePlayerRepository()
@@ -15,7 +14,7 @@ league_utils = LeagueUtilities()
 
 @league.route("/")
 def home():
-    return render_template("league_home.html")
+    return render_template("home.html")
 
 @league.route("/search_summoner", methods=["POST"])
 def find_summoner():
@@ -40,7 +39,7 @@ def get_summoner(server: str, summoner_name: str):
     except Exception as e:
         return render_template("error.html", error=e)
     
-    return render_template("league_player_home.html", player=player) 
+    return render_template("player_home.html", player=player) 
 
 @league.route("/summoner/<server>/<summoner_name>/refresh", methods=["POST"])
 def refresh_summoner(server: str, summoner_name: str):
@@ -50,7 +49,7 @@ def refresh_summoner(server: str, summoner_name: str):
         return render_template("error.html", error="Can't split summoner name")
     
     try:
-        data = player_builder.repo.fetch_account_summoner_data_name(name, tag, server)
+        data = player_builder.repo.fetch_account_with_name_tag(name, tag)
         if data:
             last_updated = data["last_updated"]
             if last_updated > datetime.now() - timedelta(minutes=1):

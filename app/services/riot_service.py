@@ -81,7 +81,7 @@ class RiotService:
         self.secret_key = os.urandom(24)
         self.ddragon_url = "https://ddragon.leagueoflegends.com"
         self.static_url = "https://static.developer.riotgames.com"
-        self.retry_delay = 1.2
+        self.retry_delay = 0.5
         self.region = region.lower()
         self.platform_url = self.region_to_platform.get(self.region)
         self.regional_url = self.region_to_regional.get(self.region)

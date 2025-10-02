@@ -1,0 +1,15 @@
+{% extends "adult/base.html" %}
+
+{% block title %}
+jaZZ - LoL
+{% endblock %}
+
+{% block content %}
+    <!-- Refresh Option -->
+    <form action="{{ url_for('league.refresh_summoner', server='na1', summoner_name='blank-3v3') }}" method="post">
+        <button type="submit" class="btn btn-primary">Refresh Profile</button>
+    </form><br>
+
+    {{player}}
+
+{% endblock %}
