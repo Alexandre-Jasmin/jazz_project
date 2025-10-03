@@ -49,6 +49,7 @@ CREATE TABLE champion_mastery_data (
 
     CONSTRAINT fk_mastery_account FOREIGN KEY (puuid)
         REFERENCES summoner_data (puuid)
+
 );
 
 -- ranked_data
@@ -60,6 +61,7 @@ CREATE TABLE ranked_data (
 	puuid			    VARCHAR(100)	NOT NULL,
     
     -- ranked information
+    league_id       VARCHAR(100) NOT NULL,
     queue_type		VARCHAR(50)  NOT NULL,
     tier		    VARCHAR(20)  NOT NULL,
     division        VARCHAR(5)   NOT NULL,
@@ -74,10 +76,63 @@ CREATE TABLE ranked_data (
     snapshot_time   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     
     CONSTRAINT fk_ranked_account FOREIGN KEY (puuid)
-        REFERENCES account_summoner_data (puuid),
+        REFERENCES summoner_data (puuid),
 
     -- prevent inserting exact duplicate snapshots
-    UNIQUE KEY uq_ranked_snapshot (puuid, queue_type, snapshot_time),
+    UNIQUE KEY uq_ranked_snapshot (puuid, queue_type, snapshot_time)
 
-    INDEX idx_ranked_puuid_queue_time (puuid, queue_type, snapshot_time)
+);
+
+CREATE TABLE challenges_total_points_data(
+
+    puuid               VARCHAR(100)    PRIMARY KEY,
+    challenge_level     VARCHAR(25)     NOT NULL,
+    current             INT             NOT NULL,
+    challenge_max       INT             NOT NULL,
+    percentile          DECIMAL(6, 5)   NOT NULL,
+
+    last_updated        TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP, 
+
+    CONSTRAINT fk_challenges FOREIGN KEY (puuid)
+        REFERENCES summoner_data(puuid)    
+
+);
+
+
+CREATE TABLE challenges_category_points(
+
+    puuid               VARCHAR(100)    NOT NULL,
+    category            VARCHAR(50)     NOT NULL,
+    challenge_level     VARCHAR(25)     NOT NULL,
+    current             INT             NOT NULL,
+    max                 INT             NOT NULL,
+    percentile          DECIMAL(6, 5)   NOT NULL,
+
+    CONSTRAINT fk_challenges_category FOREIGN KEY (puuid)
+        REFERENCES summoner_data(puuid),
+
+    PRIMARY KEY (puuid, category)
+
+);
+
+CREATE TABLE challenges_data (
+
+    -- unique Riot account ID
+	puuid			    VARCHAR(100)	NOT NULL,
+
+    challenge_id        INT             NOT NULL,
+    percentile          DECIMAL(6, 5)   NOT NULL,
+    challenge_tier      VARCHAR(25)     NOT NULL,
+    challenge_value     INT             NOT NULL,
+    achieved_time       TIMESTAMP       NULL,
+    position            INT             NULL,
+    players_in_level    INT             NULL,
+
+    last_updated	    TIMESTAMP		NOT NULL    DEFAULT CURRENT_TIMESTAMP,
+
+    -- puuid+champion_id is unique
+    PRIMARY KEY (puuid, challenge_id),
+
+    CONSTRAINT fk_challenges_data FOREIGN KEY (puuid)
+        REFERENCES summoner_data (puuid)
 );

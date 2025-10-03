@@ -2,6 +2,58 @@ from datetime import datetime
 from app.db import DBConnection
 
 class LeaguePlayerRepository:
+    
+    def insert_challenges_data(self, puuid, data):
+        challenge_level = data["totalPoints"]["level"]
+        current = data["totalPoints"]["current"]
+        challenge_max = data["totalPoints"]["max"]
+        percentile = data["totalPoints"]["percentile"]
+        with DBConnection() as db:
+            cursor = db.execute_sql(
+                "insert/challenges_total_points_data.sql",
+                (puuid,challenge_level,current,challenge_max,percentile,)
+            )
+        for category, info in data["categoryPoints"].items():
+            challenge_level = info["level"]
+            current = info["current"]
+            challenge_max = info["max"]
+            percentile = info["percentile"]
+            with DBConnection() as db:
+                cursor = db.execute_sql(
+                    "insert/challenge_category_points_data.sql",
+                    (puuid, category, challenge_level, current, challenge_max, percentile)
+                )
+        return True
+
+    def fetch_rank_with_puuid(self, puuid):
+        with DBConnection() as db:
+            cursor = db.execute_sql(
+                "fetch/ranked_data_with_puuid.sql",
+                (puuid,)
+            )
+            return cursor.fetchall()
+
+    def insert_ranked_data(self, entries):
+        for rank in entries:
+            puuid = rank["puuid"]
+            league_id = rank["leagueId"]
+            queue_type = rank["queueType"]
+            tier = rank["tier"]
+            division = rank["rank"]
+            league_points = int(rank["leaguePoints"])
+            wins = int(rank["wins"])
+            losses = int(rank["losses"])
+            veteran = rank["veteran"]
+            inactive = rank["inactive"]
+            fresh_blood = rank["freshBlood"]
+            hot_streak = rank["hotStreak"]
+            with DBConnection() as db:
+                cursor = db.execute_sql(
+                    "insert/ranked_data.sql",
+                    (puuid, league_id, queue_type, tier, division, league_points,
+                     wins, losses, veteran, inactive, fresh_blood, hot_streak,)
+                )
+        return True
 
     def fetch_champ_mastery_with_puuid(self, puuid):
         with DBConnection() as db:
