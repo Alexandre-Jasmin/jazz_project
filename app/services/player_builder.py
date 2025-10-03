@@ -20,10 +20,10 @@ class PlayerBuilder:
         summoner_data = self.repo.fetch_summoner_with_puuid_server(account_data["puuid"], server)
         mastery_data = self.repo.fetch_champ_mastery_with_puuid(account_data["puuid"])
         ranked_data = self.repo.fetch_rank_with_puuid(account_data["puuid"])
-        # challenges_data = self.repo.fetch_challenges_with_puuid(account_data["puuid"]) #! need to fetch from all 3 tables
+        challenges_data = self.repo.fetch_challenges_with_puuid(account_data["puuid"]) #! need to fetch from all 3 tables
         #latest_match_data = self.repo.fetch_matches_with_puuid(account_data["puuid"], 20)
 
-        return account_data, ranked_data
+        return account_data, challenges_data
 
         return LeaguePlayer(
             account_data,

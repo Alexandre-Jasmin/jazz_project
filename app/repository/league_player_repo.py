@@ -2,6 +2,16 @@ from datetime import datetime
 from app.db import DBConnection
 
 class LeaguePlayerRepository:
+
+    def fetch_challenges_with_puuid(self, puuid):
+        challenges_data = {}
+        with DBConnection() as db:
+            cursor = db.execute_sql(
+                "fetch/challenges_total_points_data_with_puuid.sql",
+                (puuid,)
+            )
+            data = cursor.fetchone()
+        return data
     
     def insert_challenges_data(self, puuid, data):
         challenge_level = data["totalPoints"]["level"]
