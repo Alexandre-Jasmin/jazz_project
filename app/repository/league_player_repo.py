@@ -23,6 +23,22 @@ class LeaguePlayerRepository:
                     "insert/challenge_category_points_data.sql",
                     (puuid, category, challenge_level, current, challenge_max, percentile)
                 )
+        #! for every challenge
+        for challenge in data["challenges"]:
+            challenge_id = challenge["challengeId"]
+            percentile = challenge["percentile"]
+            challenge_tier = challenge["level"]
+            challenge_value = challenge["value"]
+            achieved_time = challenge.get("achievedTime", None)
+            if achieved_time:
+                achieved_time = datetime.fromtimestamp(achieved_time / 1000)
+            position = challenge.get("position", 0)
+            player_in_level = challenge.get("playersInLevel", 0)
+            with DBConnection() as db:
+                cursor = db.execute_sql(
+                    "insert/challenges_data.sql",
+                    (puuid, challenge_id, percentile, challenge_tier, challenge_value, achieved_time, position, player_in_level,)
+                )
         return True
 
     def fetch_rank_with_puuid(self, puuid):

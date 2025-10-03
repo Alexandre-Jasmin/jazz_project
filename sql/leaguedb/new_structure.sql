@@ -99,7 +99,7 @@ CREATE TABLE challenges_total_points_data(
 );
 
 
-CREATE TABLE challenges_category_points(
+CREATE TABLE challenges_category_points_data(
 
     puuid               VARCHAR(100)    NOT NULL,
     category            VARCHAR(50)     NOT NULL,
